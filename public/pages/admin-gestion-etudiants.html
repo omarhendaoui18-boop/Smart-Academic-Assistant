@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Étudiants - SAA</title>
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Style supplémentaire pour le tableau */
+        .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-add { background: var(--accent-main); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .btn-add:hover { background: var(--accent-hover); }
+        
+        .glass-table { width: 100%; border-collapse: collapse; }
+        .glass-table th, .glass-table td { padding: 14px 20px; text-align: left; border-bottom: 1px solid var(--glass-border); font-size: 14px; }
+        .glass-table th { color: var(--text-secondary); font-weight: 500; }
+        .glass-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+        /* Modal Formulaire */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: 16px; padding: 30px; width: 100%; max-width: 450px; }
+        .modal-box h2 { margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--text-secondary); }
+        .form-group input, .form-group select { width: 100%; padding: 10px; background: var(--bg-primary); border: 1px solid var(--glass-border); border-radius: 8px; color: white; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--accent-main); }
+        .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        .btn-cancel { background: transparent; border: 1px solid var(--glass-border); color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+        .btn-submit { background: var(--accent-main); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        #formMessage { text-align: center; margin-top: 10px; font-size: 13px; }
+        .success { color: #28a745; }
+        .error { color: #ff4d4d; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo-sidebar"><i class="fas fa-graduation-cap"></i><span>SAA Admin</span></div>
+        <nav class="sidebar-nav">
+            <a href="admin-dashboard.html" class="nav-link"><i class="fas fa-chart-pie"></i> Tableau de bord</a>
+            <a href="admin-gestion-etudiants.html" class="nav-link active"><i class="fas fa-users"></i> Gestion Étudiants</a>
+            <a href="admin-gestion-utilisateurs.html" class="nav-link"><i class="fas fa-user-shield"></i> Gestion Utilisateurs</a>
+            <a href="admin-matieres.html" class="nav-link"><i class="fas fa-book"></i> Matières</a>
+        </nav>
+        <div class="sidebar-footer"><a href="#" id="logoutBtn" class="nav-link logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div class="welcome-text"><h1>Gestion des Étudiants</h1><p>Ajoutez et consultez les étudiants inscrits.</p></div>
+        </header>
+
+        <div class="content-header">
+            <h2>Liste des étudiants (<span id="countEtudiants">0</span>)</h2>
+            <button class="btn-add" id="openModalBtn"><i class="fas fa-plus"></i> Nouvel Étudiant</button>
+        </div>
+
+        <div class="glass-card">
+            <table class="glass-table">
+                <thead>
+                    <tr>
+                        <th>Matricule</th>
+                        <th>Nom Complet</th>
+                        <th>Filière</th>
+                        <th>Niveau</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody id="etudiantsTableBody">
+                    <!-- Les étudiants apparaîtront ici grâce à JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal d'ajout -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-box">
+            <h2>Ajouter un Étudiant</h2>
+            <form id="addEtudiantForm">
+                <div class="form-group"><label>Matricule</label><input type="text" id="matricule" required placeholder="ex: 2024001"></div>
+                <div class="form-group"><label>Nom</label><input type="text" id="nom" required></div>
+                <div class="form-group"><label>Prénom</label><input type="text" id="prenom" required></div>
+                <div class="form-group">
+                    <label>Filière</label>
+                    <select id="filiere">
+                        <option>Informatique</option>
+                        <option>Systèmes d'information</option>
+                        <option>Réseaux & Sécurité</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Niveau</label>
+                    <select id="niveau">
+                        <option>L1</option><option>L2</option><option>L3</option><option>M1</option><option>M2</option>
+                    </select>
+                </div>
+                <div id="formMessage"></div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" id="closeModalBtn">Annuler</button>
+                    <button type="submit" class="btn-submit">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../assets/js/admin.js"></script>
+</body>
+</html>
